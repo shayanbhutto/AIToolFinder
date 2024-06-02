@@ -69,7 +69,6 @@
             font-size: 24px;
             font-weight: bold;
             margin-bottom: 10px;
-            text-transform: uppercase;
             color: #007bff;
             display: flex;
             justify-content: space-between;
@@ -77,8 +76,11 @@
         }
 
         .tool-info .rating {
-            font-size: 18px;
-            color: #000;
+            font-size: 15px;
+            background-color: #5228a7; /* Green color for rating tag */
+            color: white;
+            padding: 2px 8px;
+            border-radius: 5px;
         }
 
         .tool-info p {
@@ -185,41 +187,98 @@
         <h1>AI Tool Finder</h1>
         <form id="toolTypeForm">
             <label for="toolType">Select Tool Type:</label>
-            <select id="toolType" name="toolType">
-                <option value="" disabled selected>Select</option>
-                <option value="All">All</option>
-                <option value="Image">Image</option>
-                <option value="AI Chatbot">AI Chatbot</option>
-                <option value="Video">Video</option>
-                <option value="Text">Text</option>
-                <option value="Code">Code</option>
-
-            </select>
+            <select id="toolType" name="toolType"></select>
+    
+            <div id="subCategoryContainer" style="display: none;">
+                <label for="subCategory">Select Sub-Category (Optional):</label>
+                <select id="subCategory" name="subCategory" disabled>
+                    <option value="">All</option>
+                </select>
+            </div> 
         </form>
-        
+    
         <div id="toolList" class="tool-info"></div>
     </div>
+    
+    
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(document).ready(function(){
-            $('#toolTypeForm select').change(function() {
-                var toolType = $('#toolType').val();
-                if (toolType) {
-                    $.ajax({
-                        type: 'POST',
-                        url: '/filter_tools',
-                        data: { toolType: toolType},
-                        success: function(response){
-                            var tools = JSON.parse(response);
-                            tools.sort((a, b) => b.RATING - a.RATING);
-                            displayTools(tools);
-                        }
+        $(document).ready(function() {
+    // Fetch categories and populate dropdown on page load
+    $.ajax({
+        type: 'GET',
+        url: '/get_categories',
+        success: function(categories) {
+            var select = $('#toolType');
+            categories.forEach(function(category) {
+                select.append($('<option>', {
+                    value: category,
+                    text: category
+                }));
+            });
+            // Initial filtering (default to "All")
+            filterTools("All", ""); 
+        }
+    });
+
+    // Fetch and populate sub-categories when category changes
+    $('#toolType').change(function() {
+        var toolType = $(this).val();
+
+        if (toolType.toLowerCase() === 'all') {
+            // Hide sub-category dropdown if "All" is selected
+            $('#subCategoryContainer').hide();
+        } else {
+            // Show sub-category dropdown and fetch data
+            $('#subCategoryContainer').show(); 
+
+            // Disable the sub-category dropdown while fetching
+            $('#subCategory').empty().prop('disabled', true);
+
+            $.ajax({
+                type: 'POST',
+                url: '/get_subcategories',
+                data: { toolType: toolType },
+                success: function(subCategories) {
+                    var subCategorySelect = $('#subCategory');
+                    // Only append the "All" option here if it's not already in subCategories
+                    if (!subCategories.includes("All")) {
+                        subCategorySelect.append($('<option>', {value: '', text: 'All'}));
+                    }
+                    subCategories.forEach(function(subCategory) {
+                        subCategorySelect.append($('<option>', {
+                            value: subCategory,
+                            text: subCategory
+                        }));
                     });
-                    // Hide the "Select" option once another option is selected
-                    $('#toolType option[value=""][disabled]').remove();
+                    subCategorySelect.prop('disabled', false); // Enable the dropdown
                 }
             });
+        }
+
+        // Filter tools based on the selected tool type (and default "All" for sub-category if hidden)
+        filterTools(toolType, $('#subCategoryContainer').is(':visible') ? $('#subCategory').val() : "");
+    });
+   
+    // Filter tools when sub-category changes (unchanged)
+    $('#subCategory').change(function() {
+        filterTools($('#toolType').val(), $(this).val());
+    });
+
+    // Function to filter and display tools
+    function filterTools(toolType, subCategory) {
+        $.ajax({
+            type: 'POST',
+            url: '/filter_tools',
+            data: { toolType: toolType, subCategory: subCategory }, 
+            success: function(response) {
+                var tools = JSON.parse(response);
+                tools.sort((a, b) => b.RATING - a.RATING);
+                displayTools(tools); // Your existing displayTools function
+            }
+        });
+    }
 
             function displayTools(tools){
                 var toolList = $('#toolList');
