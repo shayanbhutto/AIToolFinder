@@ -226,10 +226,10 @@
                 toolList.empty();
                 tools.forEach(function(tool){
                     var prosLines = tool.PROS.split('\n').map(function(line) {
-                        return `<li><strong>${line}</strong></li>`;
+                        return `<li>${line}</li>`;
                     }).join('<br><br>');
                     var consLines = tool.CONS.split('\n').map(function(line) {
-                        return `<li><strong>${line}</strong></li>`;
+                        return `<li>${line}</li>`;
                     }).join('<br><br>');
 
                     var popularTag = tool.POPULAR ? '<span class="tags popular">Popular</span>' : ''; // Adding Popular tag if tool is popular
