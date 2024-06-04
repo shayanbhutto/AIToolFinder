@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,17 +13,18 @@
         /* Custom Styles */
         body {
             font-family: 'Roboto', sans-serif;
-            background: #141414;
+            background: white;
             margin: 0;
             padding: 0;
-            color: #000;
+            color: #333;
         }
 
         .container {
             max-width: 800px;
             margin: 20px auto;
             padding: 20px;
-            background-color: black; /* White background with transparency */
+            background-color: rgba(255, 255, 255, 0.9);
+            /* White background with transparency */
             border-radius: 10px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
@@ -31,22 +33,20 @@
             text-align: center;
             font-size: 36px;
             margin-bottom: 20px;
-            background-image: linear-gradient(to right, purple, skyblue);
-            background-clip : text;
-            
-
-            color: transparent;
+            text-transform: uppercase;
+            color: #007bff;
+            /* Blue color for headings */
         }
-
 
         label {
             font-size: 18px;
             margin-bottom: 10px;
-            color: #bbbbbb;
+            color: #555;
             display: block;
         }
 
-        select, input[type="text"] {
+        select,
+        input[type="text"] {
             width: calc(100% - 22px);
             padding: 10px;
             font-size: 16px;
@@ -73,7 +73,7 @@
             font-size: 24px;
             font-weight: bold;
             margin-bottom: 10px;
-            color: #030453;
+            color: #007bff;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -81,7 +81,8 @@
 
         .tool-info .rating {
             font-size: 15px;
-            background-color: #5228a7; /* Green color for rating tag */
+            background-color: #5228a7;
+            /* Green color for rating tag */
             color: white;
             padding: 2px 8px;
             border-radius: 5px;
@@ -103,7 +104,8 @@
         }
 
         .tool-info .tags.popular {
-            background-color: red; /* Red color for popular tag */
+            background-color: red;
+            /* Red color for popular tag */
         }
 
         .tool-info .pros-cons .toggle-button {
@@ -122,7 +124,7 @@
             justify-content: space-between;
         }
 
-        .tool-info .pros-cons .content > div {
+        .tool-info .pros-cons .content>div {
             width: 48%;
         }
 
@@ -134,17 +136,20 @@
             padding-left: 20px;
         }
 
-        .tool-info .pros ul, .tool-info .cons ul {
+        .tool-info .pros ul,
+        .tool-info .cons ul {
             padding-left: 0;
             list-style-type: none;
         }
 
-        .tool-info .pros h3, .tool-info .cons h3 {
+        .tool-info .pros h3,
+        .tool-info .cons h3 {
             display: flex;
             align-items: center;
         }
 
-        .tool-info .pros h3::before, .tool-info .cons h3::before {
+        .tool-info .pros h3::before,
+        .tool-info .cons h3::before {
             content: '';
             display: inline-block;
             width: 10px;
@@ -154,11 +159,13 @@
         }
 
         .tool-info .pros h3::before {
-            background-color: #28a745; /* Green color for pros */
+            background-color: #28a745;
+            /* Green color for pros */
         }
 
         .tool-info .cons h3::before {
-            background-color: #dc3545; /* Red color for cons */
+            background-color: #dc3545;
+            /* Red color for cons */
         }
 
         .tool-info a {
@@ -177,8 +184,10 @@
         }
 
         .tool-icon {
-            width: 100%; /* Adjust the width of the image */
-            height: auto; /* Maintain aspect ratio */
+            width: 100%;
+            /* Adjust the width of the image */
+            height: auto;
+            /* Maintain aspect ratio */
             display: block;
             margin: 10px auto;
             border-radius: 5px;
@@ -186,153 +195,215 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
-        <h1>ToolsPocket.ai</h1>
+        <h1>AI Tool Finder</h1>
         <form id="toolTypeForm">
             <label for="toolType">Select Tool Type:</label>
             <select id="toolType" name="toolType"></select>
-    
+
             <div id="subCategoryContainer" style="display: none;">
                 <label for="subCategory">Select Sub-Category (Optional):</label>
                 <select id="subCategory" name="subCategory" disabled>
                     <option value="">All</option>
                 </select>
-            </div> 
+            </div>
+            <div id="subSubCategoryContainer" style="display: none;">
+                <label for="subSubCategory">Select Sub-Sub-Category (Optional):</label>
+                <select id="subSubCategory" name="subSubCategory" disabled>
+                    <option value="">All</option>
+                </select>
+            </div>
+
         </form>
-    
+
         <div id="toolList" class="tool-info"></div>
     </div>
-    
-    
+
+
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-        $(document).ready(function() {
-    // Fetch categories and populate dropdown on page load
-    $.ajax({
-        type: 'GET',
-        url: '/get_categories',
-        success: function(categories) {
-            var select = $('#toolType');
-            categories.forEach(function(category) {
-                select.append($('<option>', {
-                    value: category,
-                    text: category
-                }));
-            });
-            // Initial filtering (default to "All")
-            filterTools("All", ""); 
-        }
-    });
-
-    // Fetch and populate sub-categories when category changes
-    $('#toolType').change(function() {
-        var toolType = $(this).val();
-
-        if (toolType.toLowerCase() === 'all') {
-            // Hide sub-category dropdown if "All" is selected
-            $('#subCategoryContainer').hide();
-        } else {
-            // Show sub-category dropdown and fetch data
-            $('#subCategoryContainer').show(); 
-
-            // Disable the sub-category dropdown while fetching
-            $('#subCategory').empty().prop('disabled', true);
-
+        $(document).ready(function () {
+            // Fetch categories and populate dropdown on page load
             $.ajax({
-                type: 'POST',
-                url: '/get_subcategories',
-                data: { toolType: toolType },
-                success: function(subCategories) {
-                    var subCategorySelect = $('#subCategory');
-                    // Only append the "All" option here if it's not already in subCategories
-                    if (!subCategories.includes("All")) {
-                        subCategorySelect.append($('<option>', {value: '', text: 'All'}));
-                    }
-                    subCategories.forEach(function(subCategory) {
-                        subCategorySelect.append($('<option>', {
-                            value: subCategory,
-                            text: subCategory
+                type: 'GET',
+                url: '/get_categories',
+                success: function (categories) {
+                    var select = $('#toolType');
+                    categories.forEach(function (category) {
+                        select.append($('<option>', {
+                            value: category,
+                            text: category
                         }));
                     });
-                    subCategorySelect.prop('disabled', false); // Enable the dropdown
+                    // Initial filtering (default to "All")
+                    filterTools("All", "", "");
                 }
             });
-        }
-
-        // Filter tools based on the selected tool type (and default "All" for sub-category if hidden)
-        filterTools(toolType, $('#subCategoryContainer').is(':visible') ? $('#subCategory').val() : "");
-    });
-   
-    // Filter tools when sub-category changes (unchanged)
-    $('#subCategory').change(function() {
-        filterTools($('#toolType').val(), $(this).val());
-    });
-
-    // Function to filter and display tools
-    function filterTools(toolType, subCategory) {
-        $.ajax({
-            type: 'POST',
-            url: '/filter_tools',
-            data: { toolType: toolType, subCategory: subCategory }, 
-            success: function(response) {
-                var tools = JSON.parse(response);
-                tools.sort((a, b) => b.RATING - a.RATING);
-                displayTools(tools); // Your existing displayTools function
+    
+            // Fetch and populate sub-categories when category changes
+            $('#toolType').change(function () {
+                var toolType = $(this).val();
+    
+                if (toolType.toLowerCase() === 'all') {
+                    // Hide sub-category and sub-sub-category dropdowns if "All" is selected
+                    $('#subCategoryContainer').hide();
+                    $('#subSubCategoryContainer').hide();
+                } else {
+                    // Show sub-category dropdown and fetch data
+                    $('#subCategoryContainer').show();
+    
+                    // Disable the sub-category dropdown while fetching
+                    $('#subCategory').empty().prop('disabled', true);
+    
+                    $.ajax({
+                        type: 'POST',
+                        url: '/get_subcategories',
+                        data: { toolType: toolType },
+                        success: function (subCategories) {
+                            var subCategorySelect = $('#subCategory');
+                            // Only append the "All" option here if it's not already in subCategories
+                            if (!subCategories.includes("All")) {
+                                subCategorySelect.append($('<option>', { value: '', text: 'All' }));
+                            }
+                            subCategories.forEach(function (subCategory) {
+                                subCategorySelect.append($('<option>', {
+                                    value: subCategory,
+                                    text: subCategory
+                                }));
+                            });
+                            subCategorySelect.prop('disabled', false); // Enable the dropdown
+                        }
+                    });
+                }
+    
+                // Reset and hide the sub-sub-category dropdown
+                $('#subSubCategoryContainer').hide();
+                $('#subSubCategory').empty().prop('disabled', true); // Disable the third-level filter
+                filterTools(toolType, $('#subCategoryContainer').is(':visible') ? $('#subCategory').val() : "", "");
+            });
+    
+            // Fetch and populate sub-sub-categories when sub-category changes
+            $('#subCategory').change(function () {
+                var toolType = $('#toolType').val();
+                var subCategory = $(this).val();
+    
+                $('#subSubCategoryContainer').hide();
+                $('#subSubCategory').empty().prop('disabled', true); // Disable the third-level filter
+    
+                if (subCategory === "" || subCategory.toLowerCase() === "all") {
+                    // If "All" or empty is selected, filter only based on toolType and subCategory
+                    filterTools(toolType, subCategory, "");
+                } else {
+                    // Show sub-sub-category dropdown and fetch data
+                    $('#subSubCategoryContainer').show();
+    
+                    // Disable the sub-sub-category dropdown while fetching
+                    $('#subSubCategory').empty().prop('disabled', true);
+    
+                    $.ajax({
+                        type: 'POST',
+                        url: '/get_subsubcategories',
+                        data: { toolType: toolType, subCategory: subCategory },
+                        success: function (subSubCategories) {
+                            var subSubCategorySelect = $('#subSubCategory');
+                            // Only append the "All" option here if it's not already in subSubCategories
+                            if (!subSubCategories.includes("All")) {
+                                subSubCategorySelect.append($('<option>', { value: '', text: 'All' }));
+                            }
+                            subSubCategories.forEach(function (subSubCategory) {
+                                subSubCategorySelect.append($('<option>', {
+                                    value: subSubCategory,
+                                    text: subSubCategory
+                                }));
+                            });
+                            subSubCategorySelect.prop('disabled', false); // Enable the dropdown
+                        }
+                    });
+                    filterTools(toolType, subCategory, "");
+                }
+                filterTools(toolType, subCategory, $('#subSubCategoryContainer').is(':visible') ? $('#subSubCategory').val() : "");
+            });
+    
+            // Fetch and display tools when sub-sub-category changes
+            $('#subSubCategory').change(function () {
+                filterTools($('#toolType').val(), $('#subCategory').val(), $(this).val());
+            });
+    
+            // Function to filter and display tools
+            function filterTools(toolType, subCategory, subSubCategory) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/filter_tools',
+                    data: { toolType: toolType, subCategory: subCategory, subSubCategory: subSubCategory },
+                    success: function (response) {
+                        var tools = JSON.parse(response);
+                        tools.sort((a, b) => b.RATING - a.RATING);
+                        displayTools(tools);
+                    }
+                });
             }
-        });
-    }
-
-            function displayTools(tools){
+    
+            function displayTools(tools) {
                 var toolList = $('#toolList');
-                toolList.empty();
-                tools.forEach(function(tool){
-                    var prosLines = tool.PROS.split('\n').map(function(line) {
+                toolList.empty(); // Clear previous results
+    
+                tools.forEach(function (tool) {
+                    var prosLines = tool.PROS.split('\n').map(function (line) {
                         return `<li>${line}</li>`;
                     }).join('<br><br>');
-                    var consLines = tool.CONS.split('\n').map(function(line) {
+    
+                    var consLines = tool.CONS.split('\n').map(function (line) {
                         return `<li>${line}</li>`;
                     }).join('<br><br>');
-
-                    var popularTag = tool.POPULAR ? '<span class="tags popular">Popular</span>' : ''; // Adding Popular tag if tool is popular
+    
+                    var popularTag = tool.POPULAR ? '<span class="tags popular">Popular</span>' : '';
+    
+                    // Create the sub_sub_cat tag conditionally
+                    var subSubCatTag = tool.SUB_SUB_CAT ? `<p class="tags">${tool.SUB_SUB_CAT}</p>` : '';
+    
                     var toolInfo = `
                         <div class="card">
                             <h2>${tool.TOOL_NAME} <span class="rating">Rating: ${tool.RATING}</span></h2>
                             ${popularTag}
                             <p class="tags">${tool.CAT}</p>
                             <p class="tags">${tool.SUB_CAT}</p>
+                            ${subSubCatTag}  
                             <img src="${tool.ICON}" alt="${tool.TOOL_NAME}" class="tool-icon">
                             <p><strong>Link:</strong> <a href="${tool.LINK}" target="_blank">${tool.LINK}</a></p>
                             <p><strong>Type:</strong> ${tool.TYPE}</p>
+    
                             <div class="pros-cons">
-                                <div class="toggle-button">Pros & Cons</div>
+                                <div class="toggle-button">Benefits & Limitations</div>
                                 <div class="content" style="display: none;">
-                                    <div class="pros">
-                                        <h3>Pros</h3>
-                                        <ul>${prosLines}</ul>
-                                    </div>
-                                    <div class="cons">
-                                        <h3>Cons</h3>
-                                        <ul>${consLines}</ul>
-                                    </div>
-                                </div>
+                                                    <div class="pros">
+                                <h3>Benefits</h3>
+                                <ul>${prosLines}</ul>
+                            </div>
+                            <div class="cons">
+                                <h3>Limitations</h3>
+                                <ul>${consLines}</ul>
                             </div>
                         </div>
-                        <hr>
-                    `;
-                    toolList.append(toolInfo);
-                });
+                    </div>
+                    <hr>
+                `;
 
-                $('.toggle-button').click(function() {
-                    // Close all other expanded sections
-                    $('.content').not($(this).next('.content')).slideUp();
-                    // Toggle the clicked section
-                    $(this).next('.content').slideToggle();
-                });
-            }
-        });
-    </script>
+                toolList.append(toolInfo);
+            });
+
+            // Event handler for Pros & Cons toggle button
+            $('.toggle-button').click(function () {
+                $('.content').not($(this).next('.content')).slideUp();
+                $(this).next('.content').slideToggle();
+            });
+        }
+    });
+</script>
+
 
 </body>
+
 </html>
